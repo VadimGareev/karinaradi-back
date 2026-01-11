@@ -4,20 +4,16 @@ namespace App\Factory;
 
 use App\DTO\Input\Category\CreateCategoryInputDTO;
 use App\DTO\Input\Category\UpdateCategoryInputDTO;
-use App\DTO\Input\Product\CreateProductInputDTO;
-use App\DTO\Input\Product\UpdateProductInputDTO;
 use App\DTO\OutputDTO\Category\CategoryOutputDTO;
-use App\DTO\OutputDTO\Product\ProductOutputDTO;
 use App\Entity\Category;
-use App\Entity\Product;
-use App\Entity\ProductImages;
-use App\Repository\CategoryRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 class CategoryFactory
 {
     public function __construct(
         private EntityManagerInterface $em,
+        private SluggerInterface $slugger
     )
     {
     }
@@ -30,7 +26,7 @@ class CategoryFactory
         }
 
         $category->setTitle($createCategoryInputDTO->title);
-        $category->setSlug($createCategoryInputDTO->slug);
+        $category->setSlug($this->slugger->slug($createCategoryInputDTO->title));
         $category->setActive($createCategoryInputDTO->active);
 
         return $category;
@@ -43,7 +39,7 @@ class CategoryFactory
         }
 
         $category->setTitle($updateCategoryInputDTO->title);
-        $category->setSlug($updateCategoryInputDTO->slug);
+        $category->setSlug($this->slugger->slug($updateCategoryInputDTO->title));
         $category->setActive($updateCategoryInputDTO->active);
 
         return $category;
@@ -54,7 +50,6 @@ class CategoryFactory
         $createCategoryInputDTO = new CreateCategoryInputDTO();
 
         $createCategoryInputDTO->title = $data['title'] ?? null;
-        $createCategoryInputDTO->slug = $data['slug'] ?? null;
         $createCategoryInputDTO->categories = $data['categories'] ?? null;
         $createCategoryInputDTO->active = $data['active'] ?? null;
 
@@ -67,7 +62,17 @@ class CategoryFactory
         $categoryOutputDTO->id = $category->getId();
         $categoryOutputDTO->title = $category->getTitle();
         $categoryOutputDTO->slug = $category->getSlug();
-        $categoryOutputDTO->categories = $category->getCategories();
+
+        $related = $category->getCategory()->toArray();
+        $categoryOutputDTO->categories = array_map(
+            fn(Category $c) => [
+                'id' => $c->getId(),
+                'title' => $c->getTitle(),
+                'slug' => $c->getSlug(),
+            ],
+            $related
+        );
+
         $categoryOutputDTO->active = $category->isActive();
 
         return $categoryOutputDTO;
@@ -83,7 +88,6 @@ class CategoryFactory
         $updateCategoryInputDTO = new UpdateCategoryInputDTO();
 
         $updateCategoryInputDTO->title = $data['title'] ?? null;
-        $updateCategoryInputDTO->slug = $data['slug'] ?? null;
         $updateCategoryInputDTO->categories = $data['categories'] ?? null;
         $updateCategoryInputDTO->active = $data['active'] ?? null;
 

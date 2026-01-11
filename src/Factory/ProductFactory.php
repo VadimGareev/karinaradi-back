@@ -10,11 +10,13 @@ use App\Entity\Product;
 use App\Entity\ProductImages;
 use App\Repository\CategoryRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 class ProductFactory
 {
     public function __construct(
         private EntityManagerInterface $em,
+        private SluggerInterface $slugger
     )
     {
     }
@@ -22,6 +24,8 @@ class ProductFactory
     public function makeProduct(CreateProductInputDTO $createProductInputDTO): Product
     {
         $product = new Product();
+        $slug = $this->slugger->slug($createProductInputDTO->title);
+        $product->setSlug($slug);
         foreach ($createProductInputDTO->categories as $category) {
             $product->addCategory($this->em->getReference(Category::class, $category));
         }
@@ -38,7 +42,7 @@ class ProductFactory
         $product->setImage($createProductInputDTO->image);
         $product->setCare($createProductInputDTO->care);
         $product->setMeasurements($createProductInputDTO->measurements);
-        $product->setSlug($createProductInputDTO->slug);
+        $product->setSlug($this->slugger->slug($createProductInputDTO->title));
         $product->setModelParams($createProductInputDTO->model_params);
 
         return $product;
@@ -62,7 +66,7 @@ class ProductFactory
         $product->setImage($updateProductInputDTO->image);
         $product->setCare($updateProductInputDTO->care);
         $product->setMeasurements($updateProductInputDTO->measurements);
-        $product->setSlug($updateProductInputDTO->slug);
+        $product->setSlug($this->slugger->slug($updateProductInputDTO->title));
         $product->setModelParams($updateProductInputDTO->model_params);
 
         return $product;
@@ -79,7 +83,6 @@ class ProductFactory
         $createProductInputDTO->image = $data['image'] ?? null;
         $createProductInputDTO->care = $data['care'] ?? null;
         $createProductInputDTO->measurements = $data['measurements'] ?? null;
-        $createProductInputDTO->slug = $data['slug'] ?? null;
         $createProductInputDTO->model_params = $data['modelParams'] ?? null;
         $createProductInputDTO->categories = $data['categories'] ?? null;
         $createProductInputDTO->productImages = $data['productImages'] ?? null;
@@ -123,7 +126,6 @@ class ProductFactory
         $updateProductInputDTO->image = $data['image'] ?? null;
         $updateProductInputDTO->care = $data['care'] ?? null;
         $updateProductInputDTO->measurements = $data['measurements'] ?? null;
-        $updateProductInputDTO->slug = $data['slug'] ?? null;
         $updateProductInputDTO->model_params = $data['modelParams'] ?? null;
         $updateProductInputDTO->categories = $data['categories'] ?? null;
         $updateProductInputDTO->productImages = $data['productImages'] ?? null;

@@ -24,7 +24,7 @@ class CategoryOutputDTO
     public Collection $category;
 
     #[Groups(groups: ['category:item'])]
-    public Collection $categories;
+    public array $categories = [];
 
     #[Groups(groups: ['category:item'])]
     public ?bool $active = null;

@@ -12,10 +12,6 @@ class UpdateProductInputDTO
     #[Assert\Length(min: 1, max: 255)]
     public ?string $title = null;
 
-    #[Assert\NotBlank(allowNull: null, normalizer: 'trim')]
-    #[Assert\Length(min: 1, max: 255)]
-    public ?string $slug = null;
-
     #[Assert\NotNull]
     #[Assert\Type(type: 'float')]
     public ?float $price = null;

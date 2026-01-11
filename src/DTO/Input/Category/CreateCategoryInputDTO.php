@@ -13,10 +13,6 @@ class CreateCategoryInputDTO
     #[Assert\Length(min: 1, max: 255)]
     public ?string $title = null;
 
-    #[Assert\NotBlank(allowNull: null, normalizer: 'trim')]
-    #[Assert\Length(min: 1, max: 255)]
-    public ?string $slug = null;
-
     #[Assert\Type('array')]
     #[EntityExists(entity: Category::class)]
     public array $categories = [];
